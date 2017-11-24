@@ -11,14 +11,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/base2genomics/batchit"
+	"github.com/dtenenba/batchit"
 
 	arg "github.com/alexflint/go-arg"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/batch"
 	"github.com/aws/aws-sdk-go/service/iam"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/brentp/xopen"
 	"github.com/pkg/errors"
 )
@@ -208,12 +207,12 @@ $BATCH_SCRIPT
 	}
 
 	if !strings.Contains(cli.Image, "amazonaws") {
-		stsvc := sts.New(sess)
-		user, err := stsvc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
-		if err != nil {
-			panic(err)
-		}
-		cli.Image = fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com/%s", *user.Account, *sess.Config.Region, cli.Image)
+		// stsvc := sts.New(sess)
+		// user, err := stsvc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// cli.Image = fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com/%s", *user.Account, *sess.Config.Region, cli.Image)
 	}
 
 	jdef := &batch.RegisterJobDefinitionInput{
@@ -299,7 +298,7 @@ $BATCH_SCRIPT
 
 	j, _ := json.Marshal(submit)
 	fmt.Println(string(j))
-	panic("XXX")
+	//panic("XXX")
 
 	resp, err := b.SubmitJob(submit)
 	if err != nil {

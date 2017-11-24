@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/base2genomics/batchit/exsmount"
+	"github.com/dtenenba/batchit/exsmount"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
