@@ -18,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/batch"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/brentp/xopen"
 	"github.com/pkg/errors"
 )
@@ -33,6 +34,7 @@ type cliargs struct {
 	CPUs      int      `arg:"-c,help:number of cpus reserved by the job"`
 	Volumes   []string `arg:"-o,help:HOST_PATH=CONTAINER_PATH"`
 	Mem       int      `arg:"-m,help:memory (MiB) reserved by the job"`
+	Registry  string   `arg:"-g,help:Docker image registry. Defaults to ECR in your region."`
 	Ebs       string   `arg:"-e,help:args for ebs mount. format mount-point:size:volume-type:fstype eg /mnt/xx:500:sc1:ext4 where last 2 arguments are optional and default as shown. This assumes that batchit is installed on the host. If type==io1 the 5th argument must specify the IOPs (between 100 and 20000)"`
 	JobName   string   `arg:"-j,required,help:name of job"`
 	Path      string   `arg:"required,positional,help:path of bash script to run. With '-' it will be read from STDIN. Prefix with 'script:' to send a string."`
@@ -206,13 +208,17 @@ $BATCH_SCRIPT
 		}
 	}
 
-	if !strings.Contains(cli.Image, "amazonaws") {
-		// stsvc := sts.New(sess)
-		// user, err := stsvc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// cli.Image = fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com/%s", *user.Account, *sess.Config.Region, cli.Image)
+	if len(cli.Registry) == 0 {
+		if !strings.Contains(cli.Image, "amazonaws") {
+			stsvc := sts.New(sess)
+			user, err := stsvc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+			if err != nil {
+				panic(err)
+			}
+			cli.Image = fmt.Sprintf("%s.dkr.ecr.%s.amazonaws.com/%s", *user.Account, *sess.Config.Region, cli.Image)
+		}
+	} else {
+		cli.Image = fmt.Sprintf("%s/%s", cli.Registry, cli.Image)
 	}
 
 	jdef := &batch.RegisterJobDefinitionInput{
