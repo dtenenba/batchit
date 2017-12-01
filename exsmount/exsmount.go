@@ -111,6 +111,8 @@ func contains(haystack []string, needle string) bool {
 
 // MountLocal RAID-0's all devices onto a single mount-point.
 func MountLocal(deviceCandidates []string, mountBase string) ([]string, error) {
+	fmt.Printf("in MountLocal, deviceCandidates is %v and mountBase is %s\n",
+		deviceCandidates, mountBase)
 	inUse := mountedDevices()
 	var devices []string
 	for _, dev := range deviceCandidates {
