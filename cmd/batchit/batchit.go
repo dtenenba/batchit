@@ -7,19 +7,11 @@ import (
 	"sort"
 	"strconv"
 
-<<<<<<< HEAD
 	"github.com/dtenenba/batchit"
 	"github.com/dtenenba/batchit/ddv"
 	"github.com/dtenenba/batchit/exsmount"
 	"github.com/dtenenba/batchit/logof"
 	"github.com/dtenenba/batchit/submit"
-=======
-	"github.com/base2genomics/batchit"
-	"github.com/base2genomics/batchit/ddv"
-	"github.com/base2genomics/batchit/exsmount"
-	"github.com/base2genomics/batchit/logof"
-	"github.com/base2genomics/batchit/submit"
->>>>>>> upstream/master
 )
 
 type progPair struct {

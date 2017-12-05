@@ -347,7 +347,7 @@ func CreateAttach(cli *Args) ([]string, error) {
 			}); err != nil {
 				// race condition attaching devices from multiple containers to the same host /dev address.
 				// so retry 7 times (k) with randomish wait time.
-				log.Printf("%T. %s", err, err)
+				log.Printf("%+T. %s", err, err)
 				if strings.Contains(err.Error(), "is already in use") {
 					time.Sleep((time.Duration(3 * (k + rand.Int63n(k)))) * time.Second)
 					continue
