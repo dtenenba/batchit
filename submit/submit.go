@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -28,6 +27,7 @@ type cliargs struct {
 	Role      string   `arg:"-r,required,help:existing role name"`
 	Region    string   `arg:"help:region for batch setup"`
 	Queue     string   `arg:"-q,required,help:job queue"`
+	ArraySize int64    `arg:"-a,help:optional size of array job"`
 	DependsOn []string `arg:"-d,help:jobId(s) that this job depends on"`
 	Retries   int64    `arg:"-r,help:number of times to retry this job on failure"`
 	EnvVars   []string `arg:"-v,help:key-value environment pairs of the form NAME=value"`
@@ -220,6 +220,10 @@ $BATCH_SCRIPT
 	} else {
 		cli.Image = fmt.Sprintf("%s/%s", cli.Registry, cli.Image)
 	}
+	var arrayProp *batch.ArrayProperties
+	if cli.ArraySize != 0 {
+		arrayProp = &batch.ArrayProperties{Size: aws.Int64(cli.ArraySize)}
+	}
 
 	jdef := &batch.RegisterJobDefinitionInput{
 		JobDefinitionName: &cli.JobName,
@@ -259,8 +263,6 @@ $BATCH_SCRIPT
 				&batch.MountPoint{SourceVolume: aws.String(name), ContainerPath: aws.String(split[1])})
 		}
 	}
-	js, _ := json.Marshal(jdef)
-	fmt.Println(string(js))
 
 	ro, err := b.RegisterJobDefinition(jdef)
 	if err != nil {
@@ -272,10 +274,11 @@ $BATCH_SCRIPT
 	}
 
 	submit := &batch.SubmitJobInput{
-		DependsOn:     deps,
-		JobDefinition: ro.JobDefinitionName,
-		JobName:       aws.String(cli.JobName),
-		JobQueue:      aws.String(cli.Queue),
+		DependsOn:       deps,
+		JobDefinition:   ro.JobDefinitionName,
+		JobName:         aws.String(cli.JobName),
+		ArrayProperties: arrayProp,
+		JobQueue:        aws.String(cli.Queue),
 		ContainerOverrides: &batch.ContainerOverrides{
 			Command: commands,
 			Environment: []*batch.KeyValuePair{
@@ -301,10 +304,6 @@ $BATCH_SCRIPT
 		submit.ContainerOverrides.Environment = append(submit.ContainerOverrides.Environment,
 			&batch.KeyValuePair{Name: aws.String(pair[0]), Value: aws.String(pair[1])})
 	}
-
-	j, _ := json.Marshal(submit)
-	fmt.Println(string(j))
-	//panic("XXX")
 
 	resp, err := b.SubmitJob(submit)
 	if err != nil {
