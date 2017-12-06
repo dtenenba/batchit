@@ -149,7 +149,7 @@ func Main() {
 		//Ebs   /mnt/local:500:gp2:ext4
 		// if possible, we raid-0 2 or 3 drives for better performance.
 		n := 1
-		if (ebs[2] == "gp2" && sz > 200) || ((ebs[2] == "sc1" || ebs[2] == "st1") && sz >= 1000) {
+		if /*(ebs[2] == "gp2" && sz > 200) ||*/ (ebs[2] == "sc1" || ebs[2] == "st1") && sz >= 1000 {
 			n = 2
 		}
 		if (ebs[2] == "sc1" || ebs[2] == "st1") && sz >= 1500 {
